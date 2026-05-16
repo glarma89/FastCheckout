@@ -38,14 +38,44 @@ namespace FastCheckout
 
         public void Install()
         {
-            // TODO — see the interview brief (dotnet-fastCO-tasks.html).
-            throw new NotImplementedException();
+            if (hookHandle != IntPtr.Zero)
+                return;
+
+            proc = (nCode, wParam, lParam) =>
+            {
+                if (nCode >= 0 &&
+                    (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
+                {
+                    int virtualKeyCode = Marshal.ReadInt32(lParam);
+                    KeyPressed?.Invoke((Keys)virtualKeyCode);
+                }
+
+                return CallNextHookEx(hookHandle, nCode, wParam, lParam);
+            };
+
+            using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+            using var currentModule = currentProcess.MainModule;
+
+            hookHandle = SetWindowsHookEx(
+                WH_KEYBOARD_LL,
+                proc,
+                GetModuleHandle(currentModule?.ModuleName),
+                0);
+
+            if (hookHandle == IntPtr.Zero)
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
         }
 
         public void Dispose()
         {
-            // TODO — see the interview brief (dotnet-fastCO-tasks.html).
-            throw new NotImplementedException();
+            if (hookHandle == IntPtr.Zero)
+                return;
+
+            if (!UnhookWindowsHookEx(hookHandle))
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+
+            hookHandle = IntPtr.Zero;
+            proc = null;
         }
     }
 }
