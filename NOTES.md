@@ -158,3 +158,25 @@ Chosen because it detects the key globally while allowing the keystroke to conti
 
 4\. Design auto-reconnect with retry/backoff.
 
+
+## Implemented follow-up: configurable toggle key
+
+I implemented the configurable toggle key follow-up.
+
+The inventory toggle key is now read from:
+
+`Configuration/config_computer.json`
+
+```json
+"Hotkeys": {
+  "InventoryToggleKey": "S"
+}
+
+If the setting is missing, empty, or cannot be parsed as a valid Keys value, the application falls back to S.
+
+I tested both:
+
+Default S
+Custom value such as F8
+
+The hotkey remains non-blocking: the key press is observed globally but still reaches the focused application.
