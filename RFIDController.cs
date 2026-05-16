@@ -1,4 +1,5 @@
 using Serilog;
+using System.Text.Json;
 
 namespace FastCheckout
 {
@@ -7,6 +8,7 @@ namespace FastCheckout
         private readonly ReaderController readerController = new();
         private readonly GlobalKeyboardHook keyboardHook = new();
         private ContextMenuStrip? trayContextMenu;
+        private Keys inventoryToggleKey = Keys.S;
 
         public RFIDController()
         {
@@ -52,9 +54,11 @@ namespace FastCheckout
 
         private void ConfigureHotkey()
         {
+            inventoryToggleKey = LoadInventoryToggleKey();
+
             keyboardHook.KeyPressed += key =>
             {
-                if (key != Keys.S)
+                if (key != inventoryToggleKey)
                     return;
 
                 BeginInvoke(() =>
@@ -74,6 +78,39 @@ namespace FastCheckout
             };
 
             keyboardHook.Install();
+        }
+
+        private static Keys LoadInventoryToggleKey()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(AppConfig.SettingsFilePath))
+                    return Keys.S;
+
+                string json = File.ReadAllText(AppConfig.SettingsFilePath);
+
+                using JsonDocument document = JsonDocument.Parse(json);
+
+                if (!document.RootElement.TryGetProperty("Hotkeys", out JsonElement hotkeys))
+                    return Keys.S;
+
+                if (!hotkeys.TryGetProperty("InventoryToggleKey", out JsonElement keyElement))
+                    return Keys.S;
+
+                string? keyName = keyElement.GetString();
+
+                if (string.IsNullOrWhiteSpace(keyName))
+                    return Keys.S;
+
+                return Enum.TryParse(keyName, ignoreCase: true, out Keys parsedKey)
+                    ? parsedKey
+                    : Keys.S;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(LogFormatter.Exception(ex));
+                return Keys.S;
+            }
         }
 
         private void UpdateConnectionStatus(bool connected)

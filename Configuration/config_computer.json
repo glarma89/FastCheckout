@@ -5,5 +5,8 @@
     "AntennasPower": [ 1000,1000,1000,1000 ],
     "GPOPort": 1,
     "GPIPort": 0
+  },
+   "Hotkeys": {
+    "InventoryToggleKey": "F8"
   }
 }
