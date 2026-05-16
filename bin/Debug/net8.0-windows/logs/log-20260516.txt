@@ -1,0 +1,2 @@
+2026-05-16 14:40:43.195 +03:00 [INF] Settings read successfully, app starting..
+2026-05-16 14:49:58.238 +03:00 [INF] Settings read successfully, app starting..

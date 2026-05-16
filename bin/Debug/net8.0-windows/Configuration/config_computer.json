@@ -1,0 +1,9 @@
+{
+  "ReaderConfig": {
+    "Address": "fx960086B3A5.local",
+    "Port": 5084,
+    "AntennasPower": [ 1000,1000,1000,1000 ],
+    "GPOPort": 1,
+    "GPIPort": 0
+  }
+}
