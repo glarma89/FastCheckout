@@ -52,7 +52,28 @@ namespace FastCheckout
 
         private void ConfigureHotkey()
         {
-            // TODO — see the interview brief (dotnet-fastCO-tasks.html).
+            keyboardHook.KeyPressed += key =>
+            {
+                if (key != Keys.S)
+                    return;
+
+                BeginInvoke(() =>
+                {
+                    try
+                    {
+                        if (readerController.IsInventoryRunning)
+                            readerController.StopInventory();
+                        else
+                            readerController.StartInventory();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(LogFormatter.Exception(ex));
+                    }
+                });
+            };
+
+            keyboardHook.Install();
         }
 
         private void UpdateConnectionStatus(bool connected)
